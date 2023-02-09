@@ -9,6 +9,7 @@
 
 std::regex ID_FILTER("-(XL|SD|XF|QD|BN|DL|TS|LT)(\\d+)-");
 std::regex UA_FILTER(R"((\d+.\d+.\d+.\d+|cacao_torrent))");
+std::regex PLAYER_FILTER("-(UW\\w{4}|SP(([0-2]\\d{3})|(3[0-5]\\d{2})))-");
 
 std::regex regCOLON(":");
 

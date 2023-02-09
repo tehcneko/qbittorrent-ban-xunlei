@@ -194,7 +194,7 @@ void update_peers(const std::string &hash, const uint64_t &size) {
     auto peer_id_client = peer.FindMember("peer_id_client");
     if (peer_id_client != peer.MemberEnd() && peer_id_client->value.IsString()) {
       std::string peer_id_client_str = peer_id_client->value.GetString();
-      if (std::regex_match(peer_id_client_str, ID_FILTER)) {
+      if (std::regex_match(peer_id_client_str, ID_FILTER) || std::regex_match(peer_id_client_str, PLAYER_FILTER)) {
         std::cout << "[I] Ban: " << ip_address << " ID: " + peer_id_client_str << std::endl;
         banned_list[ip_address] = expire;
         notChangedFlag = false;
@@ -205,7 +205,7 @@ void update_peers(const std::string &hash, const uint64_t &size) {
     auto client = peer.FindMember("client");
     if (client != peer.MemberEnd() && client->value.IsString()) {
       std::string client_str = client->value.GetString();
-      if (std::regex_match(client_str, UA_FILTER)) {
+      if (std::regex_match(client_str, UA_FILTER) || client_str.find("StellarPlayer") != std::string::npos) {
         std::cout << "[I] Ban: " << ip_address << " UA: " + client_str << std::endl;
         banned_list[ip_address] = expire;
         notChangedFlag = false;
