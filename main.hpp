@@ -7,8 +7,8 @@
 
 #define BANTIME 86400
 
-std::regex XL0012("-XL0012-", std::regex_constants::icase);
-std::regex XUNLEI001("Xunlei 0\\.0\\.1\\.", std::regex_constants::icase);
+std::regex ID_FILTER("-(XL|SD|XF|QD|BN|DL|TS|LT)(\\d+)-");
+std::regex UA_FILTER(R"((\d+.\d+.\d+.\d+|cacao_torrent))");
 
 std::regex regCOLON(":");
 
