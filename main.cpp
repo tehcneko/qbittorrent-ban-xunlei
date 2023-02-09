@@ -249,7 +249,7 @@ void set_ban_list() {
     throw std::string("set_ban_list: CURL request failure! ") + curl_easy_strerror(res);
   } else {
     notChangedFlag = true;
-    std::cout << "[I] Banned: " << banned << std::endl;
+    //std::cout << "[I] Banned: " << banned << std::endl;
   }
 
   curl_easy_cleanup(curl);
