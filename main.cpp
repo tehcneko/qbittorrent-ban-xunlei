@@ -21,7 +21,7 @@ int main() {
     } catch(const char *e) {
       std::cout << "[E]" << ' ' << e << std::endl;
     }
-    sleep_for(seconds(3));
+    sleep_for(seconds(10));
   }
 
   return 0;
