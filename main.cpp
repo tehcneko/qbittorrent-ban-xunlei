@@ -13,9 +13,10 @@ using std::this_thread::sleep_for;
 bool notChangedFlag = true;
 
 int main() {
+  CURL* curl = curl_easy_init();
   while (true) {
     try {
-      do_job();
+      do_job(curl);
     } catch(std::string e) {
       std::cout << "[E]" << ' ' << e << std::endl;
     } catch(const char *e) {
@@ -23,18 +24,18 @@ int main() {
     }
     sleep_for(seconds(10));
   }
-
+  curl_easy_cleanup(curl);
   return 0;
 }
 
-void do_job() {
+void do_job(CURL* curl) {
   clear_expired_ban_list();
-  update_torrents();
+  update_torrents(curl);
   for (auto &m : torrent_list) {
-    update_peers(m.first, m.second.size);
+    update_peers(curl, m.first, m.second.size);
   }
   if (!notChangedFlag) {
-    set_ban_list();
+    set_ban_list(curl);
   }
 }
 
@@ -58,10 +59,8 @@ void clear_expired_ban_list() {
 }
 
 // 更新 Torrent 列表
-void update_torrents() {
+void update_torrents(CURL* curl) {
   static int rid = 0;
-
-  CURL *curl = curl_easy_init();
 
   if (!curl) {
     throw "update_torrents: CURL init failure!";
@@ -72,6 +71,7 @@ void update_torrents() {
   struct curl_slist *chunk = NULL;
   chunk = curl_slist_append(chunk, "Accept: application/json");
 
+  curl_easy_reset(curl);
   curl_easy_setopt(curl, CURLOPT_URL, (std::string(HOST) + "/api/v2/sync/maindata?rid=" + std::to_string(rid)).c_str());
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
   curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
@@ -83,7 +83,6 @@ void update_torrents() {
 
   CURLcode res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(curl);
   curl_slist_free_all(chunk);
 
   if (res != CURLE_OK) {
@@ -137,9 +136,7 @@ void update_torrents() {
 }
 
 // 获取正在传输的 Torrent 列表
-void update_peers(const std::string &hash, const uint64_t &size) {
-  CURL *curl = curl_easy_init();
-
+void update_peers(CURL* curl, const std::string &hash, const uint64_t &size) {
   if (!curl) {
     throw "update_peers: CURL init failure!";
   }
@@ -149,6 +146,7 @@ void update_peers(const std::string &hash, const uint64_t &size) {
   struct curl_slist *chunk = NULL;
   chunk = curl_slist_append(chunk, "Accept: application/json");
 
+  curl_easy_reset(curl);
   curl_easy_setopt(curl, CURLOPT_URL, (std::string(HOST) + "/api/v2/sync/torrentPeers?hash=" + hash + "&rid=0").c_str());
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
   curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
@@ -160,7 +158,6 @@ void update_peers(const std::string &hash, const uint64_t &size) {
 
   CURLcode res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(curl);
   curl_slist_free_all(chunk);
 
   if (res != CURLE_OK) {
@@ -216,9 +213,7 @@ void update_peers(const std::string &hash, const uint64_t &size) {
 }
 
 // 设置封禁列表
-void set_ban_list() {
-  CURL *curl = curl_easy_init();
-
+void set_ban_list(CURL* curl) {
   if (!curl) {
     throw "update_peers: CURL init failure!";
   }
@@ -235,6 +230,7 @@ void set_ban_list() {
   struct curl_slist *chunk = NULL;
   chunk = curl_slist_append(chunk, "Content-Type: application/x-www-form-urlencoded");
 
+  curl_easy_reset(curl);
   curl_easy_setopt(curl, CURLOPT_URL, (std::string(HOST) + "/api/v2/app/setPreferences").c_str());
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
   curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
@@ -252,7 +248,6 @@ void set_ban_list() {
     //std::cout << "[I] Banned: " << banned << std::endl;
   }
 
-  curl_easy_cleanup(curl);
   curl_slist_free_all(chunk);
 }
 
